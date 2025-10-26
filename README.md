@@ -1,3 +1,5 @@
+## CapiFlow
+
 Every day in Mexico, thousands of small and medium businesses struggle to survive — not because they lack customers or sales, but because they don’t get paid on time.
 
 The average payment term here is 60 to 120 days. That means a local supplier delivers products today and waits two or even four months to get paid.
