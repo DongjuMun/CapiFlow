@@ -1,0 +1,353 @@
+<%- include('includes/_nav_sme.ejs') %>
+<%- include('includes/_main_sme.ejs') %>
+
+<style>
+  /* Main wrapper */
+  .dashboard-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .main-content {
+  flex: 1;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* evita scroll general */
+}
+
+/* Cards container con altura un poco menor */
+.cards-container {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  flex: 1;
+  max-height: calc(100vh - 180px); /* un poco menos que antes */
+}
+
+/* Left card */
+.left-card {
+  flex: 2; /* ocupa más espacio que right-cards */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 100%;
+  background-color: white;
+  color: #333;
+  border-radius: 30px;
+  border: 1px solid #ccc;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Scroll solo para la tabla */
+.table-container {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* Right cards verticales */
+.right-cards {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* Cada right-card ocupa proporcionalmente */
+.right-card {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  max-height: 100%;
+  overflow: hidden; /* quita scroll innecesario */
+  background-color: white;
+  border-radius: 30px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+
+  /* Card titles */
+  .card-title {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #24244B;
+    font-size: 1.2rem;
+  }
+
+  /* Graph Styles */
+  .graph-container {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    padding: 10px 0;
+  }
+
+  .bar {
+    width: 30px;
+    background: linear-gradient(to top, #D12C22, #FF6B6B);
+    border-radius: 5px 5px 0 0;
+    position: relative;
+    transition: height 0.3s ease;
+  }
+
+  .bar-label {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: #666;
+  }
+
+  .bar-value {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: #24244B;
+  }
+
+  .pie-chart {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: conic-gradient(
+      #D12C22 0% 40%,
+      #4ECDC4 40% 70%,
+      #45B7D1 70% 85%,
+      #96CEB4 85% 100%
+    );
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .pie-center {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #24244B;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    margin-right: 5px;
+  }
+
+  .performance-metric {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #D12C22;
+    margin: 10px 0;
+  }
+
+  .metric-label {
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  /* Table Styles */
+  .table-pills {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    table-layout: fixed;
+  }
+
+  .table-pills thead th {
+    border: none;
+    color: #24244B;
+    font-weight: 600;
+    padding: 12px 8px;
+    text-align: center;
+    background: transparent;
+    font-size: 14px;
+  }
+
+  .table-pills tbody tr {
+    background-color: #f0f0f0;
+  }
+
+  .table-pills tbody td {
+    border: none;
+    padding: 12px 8px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+  }
+
+  .table-pills tbody tr td:first-child {
+    border-top-left-radius: 50px;
+    border-bottom-left-radius: 50px;
+  }
+
+  .table-pills tbody tr td:last-child {
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+  }
+
+  .table-header {
+    margin-bottom: 15px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .table-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* scroll solo en la tabla */
+    min-height: 0;
+  }
+</style>
+
+<div class="dashboard-wrapper">
+  <div class="main-content">
+    <div class="d-flex justify-content-between">
+      <div class="mb-2">
+          <h1 class="ms-4 mt-4">Dashboard</h1>
+          <div class="ms-3" style="border-bottom: 5px solid #D12C22; border-radius: 3px; width: 13rem; margin-top: -10px;"></div>
+      </div>
+    </div>
+
+    <div class="cards-container">
+      <!-- Left Card with Table -->
+      <div class="left-card">
+        <div class="table-header">
+          <h4 class="card-title mb-3" style="color: #24244B;">Investment Overview</h4>
+        </div>
+        <div class="table-container">
+          <table class="table table-pills border-0">
+            <thead class="table-light sticky-top">
+            <tr class="text-center">
+                <th>ID</th>
+                <th>Total Amount</th>
+                <th>Performance Rate</th>
+                <th>Days Left</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% facturas.forEach((f) => { %>
+                <tr class="text-center mb-3" style="background-color: #f0f0f0; border-radius: 50px; padding: 10px 0;">
+                <td style="border: none;"><%= f.id%></td>
+                <td style="border: none;"><%= f.total.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) %> USD</td>
+                <td style="border: none;"><%= f.performanceRate %>%</td>
+                <td style="border: none;"><%= f.days_left %></td>
+                </tr>
+            <% }) %>
+            </tbody>
+        </table>
+        </div>
+      </div>
+
+      <!-- Right Cards with Graphs -->
+      <div class="right-cards">
+        <!-- Top Right Card: Performance Trend -->
+        <div class="right-card">
+          <h4 class="card-title">Monthly Performance Trend</h4>
+          <div class="graph-container">
+            <div class="bar" style="height: 70%;">
+              <span class="bar-value">95%</span>
+              <span class="bar-label">Jan</span>
+            </div>
+            <div class="bar" style="height: 85%;">
+              <span class="bar-value">92%</span>
+              <span class="bar-label">Feb</span>
+            </div>
+            <div class="bar" style="height: 65%;">
+              <span class="bar-value">88%</span>
+              <span class="bar-label">Mar</span>
+            </div>
+            <div class="bar" style="height: 90%;">
+              <span class="bar-value">96%</span>
+              <span class="bar-label">Apr</span>
+            </div>
+            <div class="bar" style="height: 95%;">
+              <span class="bar-value">94%</span>
+              <span class="bar-label">May</span>
+            </div>
+            <div class="bar" style="height: 80%;">
+              <span class="bar-value">91%</span>
+              <span class="bar-label">Jun</span>
+            </div>
+          </div>
+          <div class="performance-metric">
+            <div class="metric-value">89.5%</div>
+            <div class="metric-label">Average Performance Rate</div>
+          </div>
+        </div>
+
+        <!-- Bottom Right Card: Portfolio Distribution -->
+        <div class="right-card">
+          <h4 class="card-title">Portfolio Distribution</h4>
+          <div class="pie-chart">
+            <div class="pie-center">$2.1M</div>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #D12C22;"></div>
+              <span>Technology (40%)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #4ECDC4;"></div>
+              <span>Healthcare (30%)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #45B7D1;"></div>
+              <span>Real Estate (15%)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #96CEB4;"></div>
+              <span>Energy (15%)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('includes/_footer_sme.ejs') %>

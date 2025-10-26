@@ -1,0 +1,317 @@
+<%- include('includes/_nav_investor.ejs') %>
+<%- include('includes/_main_sme.ejs') %>
+
+<div class="d-flex justify-content-between">
+  <div class="mb-4">
+    <h1 class="ms-3 mt-2">Marketplace</h1>
+    <div class="ms-2" style="border-bottom: 5px solid #D12C22; border-radius: 3px; width: 15rem; margin-top: -10px;"></div>
+  </div>
+</div>
+
+<!-- CONTENEDOR PRINCIPAL SIN FONDO GRIS -->
+<div class="container-fluid px-4" style="height: 70vh; overflow-y: auto;">
+  <div class="row g-4">
+    <% for (let invoice of invoices) { %>
+      <div class="col-12 col-md-4">
+        <!-- ADDED: product-card class, data-product-id, and cursor pointer -->
+        <div class="card h-100 text-center p-0 shadow-sm product-card" 
+             style="border-radius: 1rem; cursor: pointer; box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px !important;"
+             data-product-id="<%= invoice.id %>"
+             data-product-total="<%= invoice.total %>"
+             data-product-pR="<%= invoice.performanceRate %>"
+             data-product-category="<%= invoice.category %>"
+             data-product-purchase_rate="<%= invoice.purchase_rate %>"
+             data-product-days="<%= invoice.days_left %>"
+             data-product-sme_id="<%= invoice.sme_id %>"
+             data-product-receptorRfc="<%= invoice.sme_id %>">
+          <div class="card-body d-flex flex-column justify-content-center align-items-center p-0">
+            <h5 class="card-title fw-bold mb-2 border border-0 border-bottom w-100 py-2 rounded-top-4" style="background-color:#D12C22; color: white;"><%= invoice.razonSocial %></h5>
+            <div class="d-flex flex-column justify-content-center align-items-start w-100 ms-5">
+              <p class="align-self-start fw-semibold mb-1 mt-3" style="color: #004778;">
+                Total Amount of Invoice
+              </p>
+              <p class="align-self-start fw-light p-0 mb-3">
+                <%= invoice.total %>
+              </p>
+              <p class="align-self-start fw-semibold mb-1" style="color: #004778;">
+                Performance Rate
+              </p>
+              <p class="align-self-start fw-light p-0 mb-3">
+                <%= parseInt(invoice.performanceRate * 100) %>
+              </p>
+              <p class="align-self-start fw-semibold mb-1" style="color: #004778;">
+                Days Left
+              </p>
+              <p class="align-self-start fw-light p-0 mb-3">
+                <%= invoice.days_left %>
+              </p>
+              <p class="align-self-start fw-semibold mb-1" style="color: #004778;">
+                Client Risk Fator Category
+              </p>
+              <p class="align-self-start fw-light p-0 mb-4">
+                <%= invoice.category%>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Single Modal for all products -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: #004778;">
+        <h5 class="modal-title" id="productModalLabel" style="color: white;">Product Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body px-4" id="modalBody">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+      <div class="modal-footer d-flex justify-content-between w-100 px-3" id="modalFooter">
+        <button type="button" class="btn" data-bs-dismiss="modal"
+          style="background-color: #D12C22; border-color: #D12C22; color: white;">
+          Close
+        </button> 
+        <button type="button" class="btn simulate-btn px-3" 
+          style="background-color: #004778; border-color: #004778; color: white;">
+          Buy
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center" style="background-color: #004778; color: white; border-radius: 20px; padding: 30px;">
+      <div class="modal-body">
+        <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;"></div>
+        <h5 class="mt-3">Processing...</h5>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center" style="background-color: #004778; color: white; border-radius: 20px; padding: 30px;">
+      <div class="modal-body">
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="#28a745" class="bi bi-check-circle-fill mb-3" viewBox="0 0 16 16">
+          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 10.97l4.242-4.243a.75.75 0 1 0-1.06-1.06L6.5 9.439 5.384 8.323a.75.75 0 0 0-1.06 1.06l1.646 1.646a.75.75 0 0 0 1.06 0z"/>
+        </svg>
+        <h4 style="color: #28a745;">Your purchase was approved!</h4>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Denied Modal -->
+<!-- Denied Modal -->
+<div class="modal fade" id="deniedModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center" style="background-color: #D6463E; color: white; border-radius: 20px; padding: 30px;">
+      <div class="modal-body">
+        <!-- Ícono de tache -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="#FFD700" class="bi bi-x-circle-fill mb-3" viewBox="0 0 16 16">
+          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.646 4.646a.5.5 0 0 0 0 .708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646a.5.5 0 0 0-.708 0z"/>
+        </svg>
+        <h4 style="color: #FFD700;">The purchase was denied!</h4>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const productCards = document.querySelectorAll('.product-card');
+  const modal = new bootstrap.Modal(document.getElementById('productModal'));
+  const modalTitle = document.getElementById('productModalLabel');
+  const modalBody = document.getElementById('modalBody');
+  const simulateBtn = document.querySelector('.simulate-btn');
+  const modalFooter = document.getElementById('modalFooter');
+  
+  let currentProductId = null;
+  productCards.forEach(card => {
+    card.addEventListener('click', function() {
+      currentProductId = this.getAttribute('data-product-id');
+      currentProductTotal = this.getAttribute('data-product-total');
+      currentProductPerRa = this.getAttribute('data-product-pR');
+      currentProductCategory = this.getAttribute('data-product-category');
+      currentProductPurRa = this.getAttribute('data-product-purchase_rate');
+      currentProductDays = this.getAttribute('data-product-days');
+      currentSMEId = this.getAttribute('data-product-sme_id');
+      currentReceptorRfc = this.getAttribute('data-product-receptorRfc');
+      let purchasePercentage = 0;
+      modalTitle.textContent = `Product ${currentProductId} Details`;
+      modalBody.innerHTML = `
+        <p class="fw-bold">Description</p>
+        <p>ID: ${currentProductId}</p>
+        <p>Total Amount: ${currentProductTotal} USD</p>
+        <p>Performance rate: ${currentProductPerRa*100}%</p>
+        <p>Client Risk Fator Category: ${currentProductCategory}</p>
+        <p>Total Purchase Percentage: ${currentProductPurRa}%</p>
+        <p>Days Left: ${currentProductDays} days</p>
+        
+        <hr style="border: 1px solid #000000; margin: 1rem 0;">
+        
+        <p class="fw-bold">Simulation</p>
+        <div class="w-100 d-flex flex-column align-items-end">
+          <div class="input-group flex-nowrap mb-3">
+            <input type="text" class="form-control" id="purchaseInput" placeholder="Purchase Percentage" aria-label="Username" aria-describedby="addon-wrapping">
+            <span class="input-group-text">%</span>
+            <button type="button" class="btn btn-primary" id="simulateBtn">Simulate</button>
+          </div>
+          <p class="align-self-start" id="earningsText">You will earn: ${(currentProductTotal * currentProductPerRa / 365 * currentProductDays * purchasePercentage / 100 ).toFixed(2)} USD</p>
+        </div>
+      `;
+      const input = document.getElementById('purchaseInput');
+      const button = document.getElementById('simulateBtn');
+      const earningsText = document.getElementById('earningsText');
+      let purchaseValue = 0;
+
+      button.addEventListener('click', () => {
+        purchaseValue = input.value;
+        purchasePercentage = parseFloat(purchaseValue);
+
+        const earnings = (
+          (currentProductTotal * currentProductPerRa / 365 * currentProductDays * purchasePercentage / 100)
+        ).toFixed(2);
+
+        earningsText.textContent = `You will earn: ${earnings} USD`;
+      });
+      simulateBtn.textContent = 'Buy';
+      modal.show();
+    });
+  });
+  
+  // Add event listener for the Simulate button
+  simulateBtn.addEventListener('click', function() {
+      modalFooter.innerHTML = `
+      <button type="button" class="btn" data-bs-dismiss="modal"
+        style="background-color: #D12C22; border-color: #D12C22; color: white;">
+        Close
+      </button> 
+      <form id="buyForm">
+        <input type="hidden" name="productId" id="productIdField">
+        <input type="hidden" name="purchaseValue" id="purchaseValueField">
+        <button type="submit" class="btn simulate-btn px-3" 
+          style="background-color: #004778; border-color: #004778; color: white;">
+          Buy
+        </button>
+      </form>
+    `;
+    if (currentProductId) {
+      modalBody.innerHTML = `
+        <div class="">
+          <p class="fw-bold">Purchase Percentage</p>
+          <div class="input-group mb-3">
+            <input type="text" id="buyInput" class="form-control" placeholder="Enter a desired purchase percentage" aria-label="Username" aria-describedby="basic-addon1">
+            <span class="input-group-text" id="basic-addon1">%</span>
+          </div>
+          <p id="earnText" class="text-success">You would be earning: </p>
+          <p id="payText" class="text-warning">You would be investing: </p>
+        </div>
+      `;
+    }
+
+    const earnText = document.getElementById('earnText');
+    const payText = document.getElementById('payText');
+    const input = document.getElementById('buyInput');
+    let earnings2 = 0;
+    let inputValue = 0;
+
+    input.addEventListener('input', () => {
+      inputValue = input.value; 
+      const earnings1 = (
+          (currentProductTotal * currentProductPerRa / 365 * currentProductDays * input.value / 100)
+        ).toFixed(2);
+      earnings2 = currentProductTotal - (
+          (currentProductTotal * currentProductPerRa / 365 * currentProductDays * input.value / 100)
+        ).toFixed(2);
+
+      earnText.textContent = `You would be earning: ${earnings1} USD`;
+      payText.textContent = `You would be investing: ${earnings2} USD`;
+    });
+
+    const buyForm = document.getElementById('buyForm');
+    const currentInvestorId = 'U1';
+    buyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const res = await fetch('/investor/marketplace/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            currentSMEId,
+            currentInvestorId,
+            currentProductTotal,
+            earnings2,
+            inputValue
+          })
+        });
+
+        const data = await res.json();
+        modal.hide();
+
+        if (res.ok && data.success) {
+          const successModalEl = document.getElementById('successModal');
+          const successModal = new bootstrap.Modal(successModalEl);
+          successModal.show();
+
+          // ⏳ Hide after 3 seconds
+          setTimeout(() => successModal.hide(), 2000);
+          modalFooter.innerHTML = `
+        <button type="button" class="btn" data-bs-dismiss="modal"
+          style="background-color: #D12C22; border-color: #D12C22; color: white;">
+          Close
+        </button> 
+        <button type="button" class="btn simulate-btn px-3" 
+          style="background-color: #004778; border-color: #004778; color: white;">
+          Buy
+        </button>
+          `;
+        } else {
+          const deniedModalEl = document.getElementById('deniedModal');
+          const deniedModal = new bootstrap.Modal(deniedModalEl);
+          deniedModal.show();
+
+          setTimeout(() => deniedModal.hide(), 2000);
+
+          modal.hide();
+          modalFooter.innerHTML = `
+        <button type="button" class="btn" data-bs-dismiss="modal"
+          style="background-color: #D12C22; border-color: #D12C22; color: white;">
+          Close
+        </button> 
+        <button type="button" class="btn simulate-btn px-3" 
+          style="background-color: #004778; border-color: #004778; color: white;">
+          Buy
+        </button>
+          `;
+        }
+
+      } catch (err) {
+        const deniedModal = new bootstrap.Modal(deniedModalEl);
+        modal.hide();
+        setTimeout(() => deniedModal.hide(), 2000);
+                  modalFooter.innerHTML = `
+        <button type="button" class="btn" data-bs-dismiss="modal"
+          style="background-color: #D12C22; border-color: #D12C22; color: white;">
+          Close
+        </button> 
+        <button type="button" class="btn simulate-btn px-3" 
+          style="background-color: #004778; border-color: #004778; color: white;">
+          Buy
+        </button>
+          `;
+      }
+    });
+  });
+});
+</script>
+
+<%- include('includes/_footer_sme.ejs') %>

@@ -1,0 +1,477 @@
+<%- include('includes/_nav_sme.ejs') %>
+<%- include('includes/_main_sme.ejs') %>
+
+<!-- Add Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  /* Main wrapper to contain everything */
+  .dashboard-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .main-content {
+    flex: 1;
+    padding: 0 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  /* Cards container with proper constraints */
+  .cards-container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 400px;
+    max-height: 70vh;
+    margin-bottom: 20px;
+  }
+
+  .left-card, .right-card {
+    background-color: white;
+    color: #333;
+    border-radius: 30px;
+    border: 1px solid #ccc;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .left-card {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .right-cards {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+  }
+
+  .right-card {
+    flex: 1;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 0;
+    padding: 15px;
+    overflow-y: auto; /* Enable vertical scrolling */
+  }
+
+  /* Custom scrollbar styling */
+  .right-card::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .right-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  .right-card::-webkit-scrollbar-thumb {
+    background: #D12C22;
+    border-radius: 10px;
+  }
+
+  .right-card::-webkit-scrollbar-thumb:hover {
+    background: #B22222;
+  }
+
+  .card-title {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #24244B;
+    font-size: 1.2rem;
+    flex-shrink: 0; /* Prevent title from scrolling */
+  }
+
+  /* Chart container styles */
+  .chart-container {
+    width: 100%;
+    height: 200px;
+    position: relative;
+    flex-shrink: 0; /* Prevent chart from scrolling */
+  }
+
+  .pie-container {
+    width: 100%;
+    height: 220px;
+    position: relative;
+    flex-shrink: 0; /* Prevent chart from scrolling */
+  }
+
+  .status-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    flex-shrink: 0; /* Prevent status from scrolling */
+  }
+
+  .status-item {
+    text-align: center;
+  }
+
+  .status-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #24244B;
+  }
+
+  .status-label {
+    font-size: 0.8rem;
+    color: #666;
+  }
+
+  /* Additional content to demonstrate scrolling */
+  .additional-content {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .content-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .content-item:last-child {
+    border-bottom: none;
+  }
+
+  .item-label {
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .item-value {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #24244B;
+  }
+
+  /* Table Styles */
+  .table-pills {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    table-layout: fixed;
+  }
+
+  .table-pills thead th {
+    border: none;
+    color: #24244B;
+    font-weight: 600;
+    padding: 12px 8px;
+    text-align: center;
+    background: transparent;
+    font-size: 14px;
+  }
+
+  .table-pills tbody tr {
+    background-color: #f0f0f0;
+  }
+
+  .table-pills tbody td {
+    border: none;
+    padding: 12px 8px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+  }
+
+  .table-pills tbody tr td:first-child {
+    border-top-left-radius: 50px;
+    border-bottom-left-radius: 50px;
+  }
+
+  .table-pills tbody tr td:last-child {
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+  }
+
+  .table-header {
+    margin-bottom: 15px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .table-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    min-height: 0;
+  }
+</style>
+
+<div class="dashboard-wrapper">
+  <div class="main-content">
+    <div class="d-flex justify-content-between">
+      <div class="mb-2">
+          <h1 class="ms-4 mt-4">Dashboard</h1>
+          <div class="ms-3" style="border-bottom: 5px solid #D12C22; border-radius: 3px; width: 13rem; margin-top: -10px;"></div>
+      </div>
+    </div>
+
+    <div class="cards-container">
+      <!-- Left Card with Table -->
+      <div class="left-card">
+        <div class="table-header">
+          <h4 class="card-title mb-3" style="color: #24244B;">Invoice Investment Overview</h4>
+        </div>
+        <div class="table-container">
+          <table class="table table-pills border-0">
+            <thead>
+              <tr class="text-center">
+                <th style="color: #24244B; width: 20%;">ID</th>
+                <th style="color: #24244B; width: 40%;">Total Amount (USD)</th>
+                <th style="color: #24244B; width: 40%;">Performance Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% facturas.forEach((f) => { %>
+                <tr class="text-center">
+                  <td style="border: none;"><%= f.id %></td>
+                  <td style="border: none;"><%= f.total.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) %></td>
+                  <td style="border: none;"><%= f.performanceRate %>%</td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right Cards with Scrollable Content -->
+      <div class="right-cards">
+        <!-- Top Right Card: Collection Performance -->
+        <div class="right-card">
+          <h4 class="card-title">Monthly Collection Rate</h4>
+          <div class="chart-container">
+            <canvas id="collectionChart"></canvas>
+          </div>
+          <div class="status-indicator">
+            <div class="status-item">
+              <div class="status-value">15</div>
+              <div class="status-label">Active</div>
+            </div>
+            <div class="status-item">
+              <div class="status-value">8</div>
+              <div class="status-label">Pending</div>
+            </div>
+            <div class="status-item">
+              <div class="status-value">2</div>
+              <div class="status-label">Overdue</div>
+            </div>
+          </div>
+          
+          <!-- Additional scrollable content -->
+          <div class="additional-content">
+            <div class="content-item">
+              <span class="item-label">Total Invested</span>
+              <span class="item-value">$1,850,000</span>
+            </div>
+            <div class="content-item">
+              <span class="item-label">Collected This Month</span>
+              <span class="item-value">$245,000</span>
+            </div>
+            <div class="content-item">
+              <span class="item-label">Avg. Collection Days</span>
+              <span class="item-value">45 days</span>
+            </div>
+            <div class="content-item">
+              <span class="item-label">Success Rate</span>
+              <span class="item-value">94.2%</span>
+            </div>
+            <div class="content-item">
+              <span class="item-label">Default Rate</span>
+              <span class="item-value">2.1%</span>
+            </div>
+            <div class="content-item">
+              <span class="item-label">Pending Verification</span>
+              <span class="item-value">3 invoices</span>
+            </div>
+            <div class="content-item">
+              <span class="item-label">Next Payout</span>
+              <span class="item-value">Jun 15, 2024</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Right Card: Risk Distribution -->
+        <div class="right-card">
+          <h4 class="card-title">Portfolio by Client Risk</h4>
+          <div class="pie-container">
+            <canvas id="riskChart"></canvas>
+          </div>
+          <div class="status-indicator">
+            <div class="status-item">
+              <div class="status-value">4.2%</div>
+              <div class="status-label">Avg. Discount</div>
+            </div>
+            <div class="status-item">
+              <div class="status-value">45</div>
+              <div class="status-label">Days Avg.</div>
+            </div>
+          </div>
+          
+          <!-- Additional scrollable content -->
+          <div class="additional-content">
+            <div class="content-item">
+              <span class="item-label">Low Risk Clients</span>
+              <span class="item-value">12 companies</span>
+            </div>
+            <div class="content-item">
+              <span class="item-label">Medium Risk Clients</span>
+              <span class="item-value">8 companies</span>
+            </div>
+            <div class="content-item">
+              <span class="item-label">High Risk Clients</span>
+              <span class="item-value">5 companies</span>
+            </div>
+            <div class="content-item">
+              <span class="item-label">New Clients</span>
+              <span class="item-value">3 companies</span>
+            </div>
+            <div class="content-item">
+              <span class="item-label">Highest Investment</span>
+              <span class="item-value">$350,000</span>
+            </div>
+            <div class="content-item">
+              <span class="item-label">Lowest Investment</span>
+              <span class="item-value">$25,000</span>
+            </div>
+            <div class="content-item">
+              <span class="item-label">Risk Assessment Date</span>
+              <span class="item-value">May 30, 2024</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Initialize Collection Rate Chart
+  const collectionCtx = document.getElementById('collectionChart').getContext('2d');
+  const collectionChart = new Chart(collectionCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      datasets: [{
+        label: 'Collection Rate %',
+        data: [92, 95, 89, 96, 93, 91],
+        backgroundColor: [
+          '#D12C22', '#FF6B6B', '#FF8E8E', '#FF6B6B', '#FF8E8E', '#D12C22'
+        ],
+        borderColor: [
+          '#B22222', '#E55B5B', '#E57B7B', '#E55B5B', '#E57B7B', '#B22222'
+        ],
+        borderWidth: 1,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `Collection Rate: ${context.parsed.y}%`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: {
+            callback: function(value) {
+              return value + '%';
+            }
+          },
+          grid: {
+            color: 'rgba(0,0,0,0.1)'
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      }
+    }
+  });
+
+  // Initialize Risk Distribution Chart
+  const riskCtx = document.getElementById('riskChart').getContext('2d');
+  const riskChart = new Chart(riskCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Low Risk', 'Medium Risk', 'High Risk', 'New Clients'],
+      datasets: [{
+        data: [35, 30, 20, 15],
+        backgroundColor: [
+          '#D12C22',  // Low Risk - Red
+          '#4ECDC4',  // Medium Risk - Teal
+          '#45B7D1',  // High Risk - Blue
+          '#96CEB4'   // New Clients - Green
+        ],
+        borderColor: [
+          '#B22222',
+          '#3EB8AF',
+          '#3AA3C7',
+          '#7DB89A'
+        ],
+        borderWidth: 2,
+        hoverOffset: 15
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '60%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 12,
+            padding: 15,
+            font: {
+              size: 11
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `${context.label}: ${context.parsed}%`;
+            }
+          }
+        }
+      }
+    }
+  });
+</script>
+
+<%- include('includes/_footer_sme.ejs') %>

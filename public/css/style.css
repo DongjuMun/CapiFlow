@@ -1,0 +1,51 @@
+html {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    background-color: #004778;
+}
+
+nav {
+    width: 17%;
+}
+
+main {
+    width: 83%;
+}
+
+nav, main {
+    background-color: white;
+}
+
+.blue-title {
+    color: #24244B;
+}
+
+.gray-border {
+    border: solid 2px #B0B0B0;
+}
+
+.table-pills {
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+.table-pills tbody tr {
+  background: transparent;
+}
+
+.table-pills tbody td {
+  background-color: #f0f0f0;
+  border: none;
+  padding: 10px;
+}
+
+.table-pills tbody td:first-child {
+  border-radius: 15px 0 0 15px;
+}
+
+.table-pills tbody td:last-child {
+  border-radius: 0 15px 15px 0;
+}

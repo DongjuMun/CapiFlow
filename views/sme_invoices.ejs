@@ -1,0 +1,219 @@
+<%- include('includes/_nav_sme.ejs') %>
+<%- include('includes/_main_sme.ejs') %>
+
+<div class="d-flex flex-column" style="height: 90vh; gap: 1rem;">
+  <div style="flex: 1; display: flex; flex-direction: column; background: white; border-radius: 12px; padding: 1rem; overflow: hidden;">
+    <div class="d-flex justify-content-between">
+      <div class="mb-2">
+        <h2 class="ms-2 mt-2">Active Invoices</h2>
+        <div class="ms-2" style="border-bottom: 5px solid #D12C22; border-radius: 3px; width: 14rem; margin-top: -10px;"></div>
+      </div>
+      <div class="mb-2">
+        <button type="button" class="btn btn-primary d-flex align-items-center gap-2 rounded-4 px-3 py-2 mt-2" 
+            style="background-color: #004778; border: none;" data-bs-toggle="modal" data-bs-target="#addInvoiceModal">
+            + Add Invoice
+        </button>
+      </div>
+    </div>
+    <div style="flex: 1; overflow-y: auto; margin-top: 1rem;">
+      <table class="table table-pills border-0">
+        <thead class="table-light sticky-top">
+          <tr class="text-center">
+            <th>ID</th>
+            <th>Name</th>
+            <th>Total Amount</th>
+            <th>Performance Rate</th>
+            <th>Purchase Percentage</th>
+            <th>Days Left</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% facturas.forEach((f) => { %>
+            <% if(f.total_perchase_rate < 100){ %>
+              <tr class="text-center mb-3" style="background-color: #f0f0f0; border-radius: 50px; padding: 10px 0;">
+                <td style="border: none;"><%= f.id%></td>
+                <td style="border: none;"><%= f.receptorNombre %></td>
+                <td style="border: none;"><%= f.total.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) %> USD</td>
+                <td style="border: none;"><%= parseInt(f.performanceRate * 100) %>%</td>
+                <td style="border: none;"><%= parseInt(f.total_perchase_rate) %>% (<%= f.total.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) * f.total_perchase_rate %> USD)</td>
+                <td style="border: none;"><%=f.days_left%></td>
+              </tr>
+            <% } %>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; background: white; border-radius: 12px; padding: 1rem; overflow: hidden;">
+    <h2 class="ms-2 mt-2">Inactive Invoices</h2>
+    <div class="ms-2" style="border-bottom: 5px solid #D12C22; border-radius: 3px; width: 18rem; margin-top: -10px;"></div>
+    <div style="flex: 1; overflow-y: auto; margin-top: 1rem;">
+      <table class="table table-pills border-0">
+        <thead class="table-light sticky-top">
+          <tr class="text-center">
+            <th>ID</th>
+            <th>Name</th>
+            <th>Total Amount</th>
+            <th>Performance Rate</th>
+            <th>Received Amount</th>
+            <th>Fee Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% facturas.forEach((f) => { %>
+            <% if(f.total_perchase_rate >= 100){ %>
+              <tr class="text-center mb-3" style="background-color: #f0f0f0; border-radius: 50px; padding: 10px 0;">
+                <td style="border: none;"><%= f.id%></td>
+                <td style="border: none;"><%= f.receptorNombre %></td>
+                <td style="border: none;"><%= f.total.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) %> USD</td>
+                <td style="border: none;"><%= f.performanceRate * 100 %>%</td>
+                <td class="text-success" style="border: none;"><%= (f.total.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) * (1 - f.performanceRate - 0.02)).toFixed(2)%> USD (<%= (1 - f.performanceRate - 0.02) * 100 %>%)</td>
+                <td class="text-danger" style="border: none;"><%= f.total.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) * (parseFloat(f.performanceRate) + 0.02)%> USD (<%= (parseFloat(f.performanceRate) + 0.02) * 100 %>%)</td>  
+              </tr>
+            <% } %>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="addInvoiceModal" tabindex="-1" aria-labelledby="addInvoiceModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/sme/invoices/add" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addInvoiceModalLabel">Upload CFDI XML</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="cfdiFile" class="form-label">Select XML file</label>
+            <input class="form-control" type="file" id="cfdiFile" name="cfdiFile" accept=".xml" required>
+          </div>
+          <div class="mb-3">
+            <label for="paymentDays" class="form-label">Expected Payment Delay (days)</label>
+            <input class="form-control" type="number" id="paymentDays" name="paymentDays" min="0" placeholder="e.g. 30" required>
+            <div class="form-text">Enter the number of days for payment completion.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background-color: #004778; border: none;">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center" style="background-color: #004778; color: white; border-radius: 20px; padding: 30px;">
+      <div class="modal-body">
+        <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;"></div>
+        <h5 class="mt-3">Processing...</h5>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center" style="background-color: #004778; color: white; border-radius: 20px; padding: 30px;">
+      <div class="modal-body">
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="#28a745" class="bi bi-check-circle-fill mb-3" viewBox="0 0 16 16">
+          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 10.97l4.242-4.243a.75.75 0 1 0-1.06-1.06L6.5 9.439 5.384 8.323a.75.75 0 0 0-1.06 1.06l1.646 1.646a.75.75 0 0 0 1.06 0z"/>
+        </svg>
+        <h4 style="color: #28a745;">Your bill was approved!</h4>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Denied Modal -->
+<!-- Denied Modal -->
+<div class="modal fade" id="deniedModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center" style="background-color: #D6463E; color: white; border-radius: 20px; padding: 30px;">
+      <div class="modal-body">
+        <!-- Ícono de tache -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="#FFD700" class="bi bi-x-circle-fill mb-3" viewBox="0 0 16 16">
+          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.646 4.646a.5.5 0 0 0 0 .708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646a.5.5 0 0 0-.708 0z"/>
+        </svg>
+        <h4 style="color: #FFD700;">The bill was denied!</h4>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.querySelector("#addInvoiceModal form");
+  const addInvoiceModalEl = document.getElementById("addInvoiceModal");
+  const loadingModalEl = document.getElementById("loadingModal");
+  const successModalEl = document.getElementById("successModal");
+  const deniedModalEl = document.getElementById("deniedModal");
+
+  const addInvoiceModal = new bootstrap.Modal(addInvoiceModalEl);
+  const loadingModal = new bootstrap.Modal(loadingModalEl);
+  const successModal = new bootstrap.Modal(successModalEl);
+  const deniedModal = new bootstrap.Modal(deniedModalEl);
+
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    // Cierra el modal de subir factura
+    bootstrap.Modal.getInstance(addInvoiceModalEl).hide();
+
+    setTimeout(async () => {
+      loadingModal.show();
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch(form.action, {
+          method: form.method,
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        // Espera 2s simulando el "Processing..."
+        setTimeout(() => {
+          loadingModal.hide();
+
+          if (data && data.message) {
+            if (data.message.includes("exitosamente")) {
+              successModal.show();
+              setTimeout(() => {
+                successModal.hide();
+                location.reload();
+              }, 2000);
+            } else if (data.message.includes("denegada")) {
+              deniedModal.show();
+              setTimeout(() => {
+                deniedModal.hide();
+                location.reload(); // recarga la página después del error
+              }, 2000);
+            }
+          }
+        }, 2000);
+      } catch (error) {
+        deniedModal.show();
+        setTimeout(() => {
+          deniedModal.hide();
+          location.reload(); // recarga la página si hay error de fetch
+        }, 2000);
+      }
+    }, 400);
+  });
+});
+</script>
+
+
+
+<%- include('includes/_footer_sme.ejs') %>
